@@ -1,13 +1,6 @@
 from rest_framework import serializers
-from .models import Cart, Category, Comments, Rating, Stuffs
+from .models import Category, Comments, Rating, Stuffs, Favorites
 from django.db.models import Avg
-
-
-class CartSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Cart
-        fields = '__all__'
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -18,6 +11,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class CommentsSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source='author.name')
 
     def create(self,validated_data):
         request = self.context.get('request')
@@ -27,15 +21,25 @@ class CommentsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comments
-        field = '__all__'
+        fields = '__all__'
+
+
+class FavoritesSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source='author.name')
+    # body = serializers.ReadOnlyField(sourse='author.name')
+
+    class Meta:
+        model = Comments
+        fields = '__all__'
 
 
 class RatingSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source='author.name')
     
     class Meta:
         model = Rating
-        field = '__all__'
-    
+        fields = '__all__'
+
     def create(self,validated_data):
         request = self.context.get('request')
         user = request.user
@@ -43,8 +47,8 @@ class RatingSerializer(serializers.ModelSerializer):
         return rating
 
     def validate_rating(self, rating):
-        if rating not in range(1,6):
-            raise serializers.ValidationError('Необходимо указать рейтинг от 1 до 5 включительно!')
+        if rating not in range(1,11):
+            raise serializers.ValidationError('Необходимо указать рейтинг от 1 до 10 включительно!')
         return rating
 
     def update(self, instance, validated_data):
@@ -70,12 +74,5 @@ class StuffSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['comments'] = CommentsSerializer(Comments.objects.filter(stuff=instance.pk), many=True).data
         representation['ratings'] = instance.ratings.aggregate(Avg('rating'))['rating__avg']
+        # representation['favorites'] = FavoritesSerializer(Favorites.objects.filter(stuff=instance.pk), many=True).data
         return representation
-
-#============================================
-
-class CartSerializer(serializers.ModelSerializer):
-    items = serializers.StringRelatedField(many=True)
-    class Meta:
-        model = Cart
-        fields = '__all__'

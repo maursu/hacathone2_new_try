@@ -17,16 +17,12 @@ class Category(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save()
-    
-    # class Meta:
-    #     verbose_name = 'Category'
-    #     verbose_name_plural = "Categories"
 
 
 class Stuffs(models.Model):
     title = models.CharField(max_length=30)
     descriptinon = models.TextField()
-    image = models.ImageField()
+    image = models.ImageField(upload_to='stuffs_image/', blank=True)
     slug = models.SlugField(max_length=30, primary_key=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='stuffs')
     posted_at = models.DateField(auto_now_add=True)
@@ -82,20 +78,7 @@ class Comments(models.Model):
         verbose_name_plural = "Commentaries"
 
 
-#_________________________________________________________________________________________
-
-class Cart(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def total(self):
-        total = 0
-        for item in self.items.all():
-            total += item.stuffs.price * item.quantity
-        return total
-
-class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+class Favorites(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Stuffs, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
+    favorites = models.ManyToManyField(Stuffs, related_name='favorited_by', blank=True)
