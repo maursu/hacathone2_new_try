@@ -72,4 +72,4 @@ class Comments(models.Model):
 class Favorites(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Stuffs, on_delete=models.CASCADE)
-    favorites = models.ManyToManyField(Stuffs, related_name='favorited_by', blank=True)
+    favorites = models.BooleanField(default=False)
