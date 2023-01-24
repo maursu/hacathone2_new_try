@@ -68,14 +68,7 @@ class StuffViewSet(ModelViewSet):
         elif self.action in ['update','partial_update', 'destroy']:
             self.permission_classes = [IsOwnerOrReadOnly]          
         
-        return super().get_permissions()
-    
-    @action(['GET'], detail=True)
-    def favorites(self, request, pk=None):
-        stuff = self.get_object()
-        comments = stuff.comments.all()
-        serializer = CommentsSerializer(comments, many=True)
-        return Response(serializer.data, status=200)   
+        return super().get_permissions() 
 
 
 class CommentCreateView(ModelViewSet):

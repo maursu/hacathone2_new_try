@@ -42,15 +42,6 @@ class Stuffs(models.Model):
         verbose_name_plural = "Stuffs"
 
 
-# class Cart(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart')
-#     quantity = models.IntegerField()
-#     title = models.ForeignKey(Stuffs, on_delete=models.CASCADE, related_name='cart')
-
-#     def __str__(self) -> str:
-#         return self.title
-
-
 class Rating(models.Model):
     author = models.ForeignKey(User,on_delete=models.CASCADE, related_name='ratings')
     rating = models.PositiveSmallIntegerField()
