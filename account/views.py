@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from .serializers import RegistrationSerializer, LoginSerializer, ActivationSerializer, ChangePasswordSerializer, ForgotPasswordSerializer,RebuildForgottenPasswordSerializer, CartSerializer
+from .serializers import RegistrationSerializer, LoginSerializer, ActivationSerializer, ChangePasswordSerializer, ForgotPasswordSerializer,RebuildForgottenPasswordSerializer
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
@@ -8,7 +8,6 @@ from .permissions import IsActivePermission
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.viewsets import ModelViewSet
-from .models import Cart
 from rest_framework.decorators import action
 
 # Create your views here.

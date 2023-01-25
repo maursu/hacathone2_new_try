@@ -30,13 +30,7 @@ class FavoritesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorites
         fields = ('user','product', 'favorites')
-
-
-
-
-
-    
-
+   
 
 class RatingSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.name')
@@ -79,5 +73,6 @@ class StuffSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['comments'] = CommentsSerializer(Comments.objects.filter(stuff=instance.pk), many=True).data
         representation['ratings'] = instance.ratings.aggregate(Avg('rating'))['rating__avg']
-        # representation['favorites'] = FavoritesSerializer(Favorites.objects.filter(user=instance.user), many=True).data
+        representation['likes'] = instance.likes.count()
+        representation['favorites'] = FavoritesSerializer(Favorites.objects.filter(favorites=True), many = True).data
         return representation

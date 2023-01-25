@@ -31,9 +31,10 @@ class StuffViewSet(ModelViewSet):
     queryset = Stuffs.objects.all()
     serializer_class = StuffSerializer
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['title', 'category']
-    search_fields = ['created_at']
+    filterset_fields = ['title', 'category__slug']    #Фильтрация
+    search_fields = ['category__slug','title',]
     ordering_fields = ['created_at', 'title']
+    ordering = ['title']
 
     @action(['GET'], detail=True)
     def comments(self, request, pk=None):
@@ -111,8 +112,6 @@ class StuffViewSet(ModelViewSet):
         
         return super().get_permissions() 
 
- 
-
 
 class FavoritesListView(APIView):
 
@@ -125,15 +124,12 @@ class FavoritesListView(APIView):
     def delete(self, request, pk):
         try:
             favorite = Favorites.objects.get(id=pk)
+            deleted = favorite.product
             favorite.delete()
-            return Response(f'{favorite} was deleted')
+            return Response(f' {deleted} was deleted')
         except Favorites.DoesNotExist:
             return Response('This favorite does not exists')
      
-        
-
-
-
 
 class CommentCreateView(ModelViewSet):
 
