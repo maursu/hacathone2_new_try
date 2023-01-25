@@ -5,10 +5,11 @@ from .serializers import CategorySerializer, RatingSerializer, StuffsListSeriali
 from rest_framework.viewsets import ModelViewSet
 import django_filters
 from rest_framework import filters
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action, APIView,api_view
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .permission import IsAdminAuthPermission, IsOwnerOrReadOnly
+from drf_yasg.utils import swagger_auto_schema
 
 # Create your views here.
 
@@ -62,7 +63,7 @@ class StuffViewSet(ModelViewSet):
                 instance = Rating.objects.get(author=request.user, stuff=pk)
                 serializer.update(instance, request.data)
                 return Response(f"Обновлен. Установлен рейтинг: {serializer.validated_data.get('rating')}")
-
+    @action(['post'], detail=True)
     def get_serializer_class(self):
         if self.action == 'list':
             return StuffsListSerializer
@@ -78,10 +79,41 @@ class StuffViewSet(ModelViewSet):
         
         return super().get_permissions() 
 
+    @action(['POST'], detail=True)
+    def favorite(self, request, pk=None):
+        product = self.get_object()
+        user = request.user    
+        try:
+            favorite = Favorites.objects.get(product=product, user=user)
+            favorite.favorites = not favorite.favorites
+            favorite.save()
+            if not favorite.favorites:
+                favorite.delete()
+        except Favorites.DoesNotExist:
+            favorite = Favorites.objects.create(product=product, user=request.user, favorites=True)
+        message ='added_to favorite' if favorite.favorites == True else 'removed from favorites'
+        return Response(message, status=200)
 
-class FavoritesListView(ModelViewSet):
-    queryset = Favorites.objects.all()
-    serializer_class = FavoritesSerializer
+
+class FavoritesListView(APIView):
+
+    permission_classes = [IsAdminAuthPermission]
+
+    def get(self,request):
+        queryset = Favorites.objects.filter(user=request.user)
+        serializer = FavoritesSerializer(queryset, many=True)
+        return Response(serializer.data,status=200)
+    def delete(self, request, pk):
+        try:
+            favorite = Favorites.objects.get(id=pk)
+            favorite.delete()
+            return Response(f'{favorite} was deleted')
+        except Favorites.DoesNotExist:
+            return Response('This favorite does not exists')
+     
+        
+
+
 
 
 class CommentCreateView(ModelViewSet):

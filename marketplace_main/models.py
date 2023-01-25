@@ -70,6 +70,9 @@ class Comments(models.Model):
 
 
 class Favorites(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
     product = models.ForeignKey(Stuffs, on_delete=models.CASCADE)
     favorites = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return self.product

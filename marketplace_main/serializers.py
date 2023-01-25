@@ -25,10 +25,17 @@ class CommentsSerializer(serializers.ModelSerializer):
 
 
 class FavoritesSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='author.name')
 
     class Meta:
         model = Favorites
-        fields = ('product', 'favorites')
+        fields = ('user','product', 'favorites')
+
+
+
+
+
+    
 
 
 class RatingSerializer(serializers.ModelSerializer):
