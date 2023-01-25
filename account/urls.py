@@ -9,6 +9,6 @@ urlpatterns = [
     path('logout/', LogoutView.as_view()),
     path('change_password/',ChangePasswordView.as_view()),
     path('pass_forgot/', ForgotPasswordView.as_view()),
-    path('inst-forgotten-pass/', RebuildForgottenPasswordView.as_view())
+    path('inst-forgotten-pass/', RebuildForgottenPasswordView.as_view()),
 ]
 
