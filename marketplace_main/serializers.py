@@ -25,7 +25,6 @@ class CommentsSerializer(serializers.ModelSerializer):
 
 
 class FavoritesSerializer(serializers.ModelSerializer):
-    # author = serializers.ReadOnlyField(source='user.name')
 
     class Meta:
         model = Favorites
@@ -73,5 +72,5 @@ class StuffSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['comments'] = CommentsSerializer(Comments.objects.filter(stuff=instance.pk), many=True).data
         representation['ratings'] = instance.ratings.aggregate(Avg('rating'))['rating__avg']
-        representation['favorites'] = FavoritesSerializer(Favorites.objects.filter(product=instance.pk), many=True).data
+        # representation['favorites'] = FavoritesSerializer(Favorites.objects.filter(user=instance.user), many=True).data
         return representation
