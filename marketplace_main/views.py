@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import generics
-from .models import Category, Rating, Stuffs, Comments, Favorites 
+from .models import Category, Rating, Stuffs, Comments, Favorites, Likes
 from .serializers import CategorySerializer, RatingSerializer, StuffsListSerializer, CommentsSerializer, StuffSerializer, FavoritesSerializer
 from rest_framework.viewsets import ModelViewSet
 import django_filters
@@ -62,6 +62,23 @@ class StuffViewSet(ModelViewSet):
                 instance = Rating.objects.get(author=request.user, stuff=pk)
                 serializer.update(instance, request.data)
                 return Response(f"Обновлен. Установлен рейтинг: {serializer.validated_data.get('rating')}")
+    
+    @action(['POST'], detail=True)
+    def like(self,request,pk):
+        stuff = self.get_object()
+        user = request.user
+        try:
+            like = Likes.objects.get(stuff=stuff, author=user)
+            like.is_liked = not like.is_liked
+            like.save()
+            message = 'like' if like.is_liked else 'like removed'
+            if not like.is_liked:
+                like.delete()
+        except Likes.DoesNotExist:
+            Likes.objects.create(stuff=stuff, author=user, is_liked=True)
+            message = 'like'
+        return Response(message, status=200)
+
 
     def get_serializer_class(self):
         if self.action == 'list':

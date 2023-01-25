@@ -73,3 +73,13 @@ class Favorites(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Stuffs, on_delete=models.CASCADE)
     favorites = models.BooleanField(default=False)
+
+
+class Likes(models.Model): 
+    author = models.ForeignKey(User,on_delete=models.CASCADE, related_name='likes')
+    stuff = models.ForeignKey(Stuffs, on_delete=models.CASCADE, related_name='likes')
+    is_liked = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f'Лайk от: {self.author}'
+# Лайки реализованы формально для соответствия требованиям. 
