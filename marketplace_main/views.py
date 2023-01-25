@@ -80,6 +80,22 @@ class StuffViewSet(ModelViewSet):
             message = 'like'
         return Response(message, status=200)
 
+    @action(['POST'], detail=True)
+    def favorite(self,request,pk):
+        product = self.get_object()
+        user = request.user
+        try:
+            favorite = Favorites.objects.get(product=product, user=user)
+            favorite.favorites = not favorite.favorites
+            favorite.save()
+            message = 'added in favorites' if favorite.favorites else 'removed from favorites'
+            if not favorite.favorites:
+                favorite.delete()
+        except Favorites.DoesNotExist:
+            Favorites.objects.create(product=product, user=user, favorites=True)
+            message = 'added to favorites'
+        return Response(message, status=200)
+
     def get_serializer_class(self):
         if self.action == 'list':
             return StuffsListSerializer
