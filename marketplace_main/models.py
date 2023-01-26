@@ -86,4 +86,21 @@ class Likes(models.Model):
 
     def __str__(self) -> str:
         return f'Лайk от: {self.author}'
-# Лайки реализованы формально для соответствия требованиям. 
+# Лайки реализованы формально для соответствия требованиям.
+
+
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    products = models.ForeignKey(Stuffs, on_delete=models.CASCADE, related_name='products_in_cart')
+    quantity = models.IntegerField(default=1)
+    price = models.BigIntegerField(default=0)
+
+
+    def __str__(self):
+        return self.products.title
+
+class Order:
+    order_number = models.PositiveBigIntegerField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    product = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='orders')
+    shipping_address = models.CharField(max_length=150, blank=False)
