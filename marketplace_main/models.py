@@ -28,6 +28,7 @@ class Stuffs(models.Model):
     posted_at = models.DateField(auto_now_add=True)
     price = models.IntegerField()
     quantity = models.IntegerField()
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
 
     def __str__(self) -> str:
         return self.title
@@ -76,6 +77,7 @@ class Favorites(models.Model):
     
     def __str__(self) -> str:
         return self.product
+
 
 class Likes(models.Model): 
     author = models.ForeignKey(User,on_delete=models.CASCADE, related_name='likes')

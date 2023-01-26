@@ -2,7 +2,6 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from .utils import send_activation_code
 from django.core.mail import send_mail
-
 User = get_user_model()
 
 
@@ -54,7 +53,6 @@ class ActivationSerializer(serializers.Serializer):
         user.save()
 
 
-
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True)
@@ -78,11 +76,8 @@ class LoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Введены некорректные данные')
         else:
             raise serializers.ValidationError('Email и пароль обязательны к заполнению')
-
         data['user'] = user
         return data
-
-
 
 
 class ChangePasswordSerializer(
