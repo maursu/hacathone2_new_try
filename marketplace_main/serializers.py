@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Comments, Rating, Stuffs, Favorites
+from .models import Category, Comments, Rating, Stuffs, Favorites, Cart, Order
 from django.db.models import Avg
 
 
@@ -74,5 +74,30 @@ class StuffSerializer(serializers.ModelSerializer):
         representation['comments'] = CommentsSerializer(Comments.objects.filter(stuff=instance.pk), many=True).data
         representation['ratings'] = instance.ratings.aggregate(Avg('rating'))['rating__avg']
         representation['likes'] = instance.likes.count()
-        representation['favorites'] = FavoritesSerializer(Favorites.objects.filter(favorites=True), many = True).data
+        representation['favorites'] = FavoritesSerializer(Favorites.objects.filter(favorites=True, product=instance.pk), many = True).data
         return representation
+
+
+class CartSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Cart
+        fields = '__all__'
+
+    total_price = 0
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        self.total_price += instance.price
+        return representation
+
+
+    # def to_representation(self, instance):
+    #     representation = super().to_representation(instance)
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Order
+        fields = '__all__'

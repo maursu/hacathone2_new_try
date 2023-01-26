@@ -11,7 +11,7 @@ class RatingInline(admin.TabularInline):
     model = Rating
 
 @admin.register(Stuffs)
-class PostAdmin(admin.ModelAdmin):
+class StuffAdmin(admin.ModelAdmin):
     list_display = ('title', 'posted_at', 'price', 'quantity')
     inlines = [RatingInline]
     search_fields = ['title', 'posted_at']
@@ -24,7 +24,7 @@ class PostAdmin(admin.ModelAdmin):
         return result['rating__avg']
 
 @admin.register(Comments)
-class PostAdmin(admin.ModelAdmin):
+class CommentsAdmin(admin.ModelAdmin):
     list_display = ['stuff', 'author', 'body', 'posted_at']
     search_fields = ['stuff', 'posted_at']
     ordering = ['-posted_at']
