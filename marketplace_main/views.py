@@ -1,5 +1,5 @@
-from .models import Category, Rating, Stuffs, Comments, Favorites, Likes
-from .serializers import CategorySerializer, RatingSerializer, StuffsListSerializer, CommentsSerializer, StuffSerializer, FavoritesSerializer
+from .models import Category, Rating, Stuffs, Comments, Favorites, Likes, Cart
+from .serializers import CategorySerializer, RatingSerializer, StuffsListSerializer, CommentsSerializer, StuffSerializer, FavoritesSerializer,CartSerializer, OrderSerializer
 from rest_framework.viewsets import ModelViewSet
 import django_filters
 from rest_framework import filters
@@ -8,7 +8,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .permission import IsAdminAuthPermission, IsOwnerOrReadOnly, IsSellerOdAdmin
 from drf_yasg.utils import swagger_auto_schema
-# Create your views here.
+from collections import OrderedDict
+
 
 
 class CategoryListView(ModelViewSet):
@@ -77,7 +78,7 @@ class StuffViewSet(ModelViewSet):
             message = 'like'
         return Response(message, status=200)
 
-    @action(['POST'], detail=True)
+    @action(['POST'], detail=False)
     def favorite(self,request,pk):
         product = self.get_object()
         user = request.user
@@ -91,6 +92,22 @@ class StuffViewSet(ModelViewSet):
         except Favorites.DoesNotExist:
             Favorites.objects.create(product=product, user=user, favorites=True)
             message = 'added to favorites'
+        return Response(message, status=200)
+
+    @action(['POST'], detail=True)
+    def add_to_cart(self,request,pk):
+        products = self.get_object()
+        user = request.user
+        quantity = int(request.data.get('quantity'))
+        price = quantity * products.price 
+        try:
+            cart = Cart.objects.get(products=products, user=user)
+            cart.quantity += quantity
+            cart.price += price
+            cart.save()
+        except Cart.DoesNotExist:
+            Cart.objects.create(products=products, user=user, quantity=quantity, price=price)
+        message = F'{quantity} {products} added to cart '
         return Response(message, status=200)
 
     def get_serializer_class(self):
@@ -125,7 +142,37 @@ class FavoritesListView(APIView):
             return Response(f' {deleted} was deleted')
         except Favorites.DoesNotExist:
             return Response('This favorite does not exists')
-     
+
+class CartView(ModelViewSet):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+
+    def list(self, request, *args, **kwargs):
+        total = OrderedDict({'total_price':sum(i.price for i in self.queryset)})
+        self.queryset = Cart.objects.filter(user=request.user)
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            new_responce = list(serializer.data)
+            new_responce.append(total)
+
+
+            return self.get_paginated_response(new_responce)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get_permissions(self):
+        if self.action in ['update','partial_update', 'destroy']:
+            self.permission_classes = [IsAdminAuthPermission]          
+        
+        return super().get_permissions()
+
+
+class OrderView(APIView):
+    pass 
+
 
 class CommentCreateView(ModelViewSet):
 
@@ -149,3 +196,4 @@ def similar_products(request, slug):
     similar_products = Stuffs.objects.filter(category=stuffs.category).exclude(slug=slug)
     serializer = StuffsListSerializer(similar_products, many=True)
     return Response(serializer.data)
+
