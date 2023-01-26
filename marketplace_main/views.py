@@ -31,11 +31,12 @@ class StuffViewSet(ModelViewSet):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['title', 'category__slug']    #Фильтрация
     search_fields = ['category__slug','title',]
-    ordering_fields = ['created_at', 'title']
+    ordering_fields = ['posted_at', 'title', 'price']
     ordering = ['title']
 
     @action(['GET'], detail=True)
     def comments(self, request, pk=None):
+        print(request)
         stuff = self.get_object()
         comments = stuff.comments.all()
         serializer = CommentsSerializer(comments, many=True)
@@ -139,7 +140,7 @@ class FavoritesListView(APIView):
             favorite = Favorites.objects.get(id=pk)
             deleted = favorite.product
             favorite.delete()
-            return Response(f' {deleted} was deleted')
+            return Response(f'{deleted} was deleted')
         except Favorites.DoesNotExist:
             return Response('This favorite does not exists')
 

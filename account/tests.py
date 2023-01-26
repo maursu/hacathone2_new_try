@@ -1,6 +1,6 @@
 from rest_framework.test import APITestCase, APIRequestFactory, force_authenticate
 from .models import User
-from .views import RegistrationView, LoginView, ForgotPasswordView, RebuildForgottenPasswordView, ChangePasswordView, LogoutView
+from .views import RegistrationView, LoginView, ForgotPasswordView, ChangePasswordView, LogoutView
 
 # Create your tests here.
 
@@ -24,11 +24,8 @@ class UserTest(APITestCase):
             'last_name': 'test_last_name'
         }
         request = self.factory.post('register/', data, format='json')
-        # print(request)
         view = RegistrationView.as_view()
         response = view(request)
-        # print(response)
-
         assert response.status_code == 201
         assert User.objects.filter(email = data['email']).exists()
 
@@ -40,13 +37,9 @@ class UserTest(APITestCase):
         request = self.factory.post('login/', data, format = 'json')
         view = LoginView.as_view()
         response = view(request)
-        # print(response.data)
-
         assert response.status_code == 200
         assert 'token' in response.data
         
-# b7b5dc0f9d6adcc23261fdea468bbc562e30fa5b        
-
     def test_change_password(self):
         data = {
             'old_password':'pimp',
@@ -66,7 +59,6 @@ class UserTest(APITestCase):
         request = self.factory.post('pass_forgot/', data, format='json')
         view =ForgotPasswordView.as_view()
         response = view(request)
-        # print(response.data)
         assert response.status_code == 200
     
     def test_logout(self):
