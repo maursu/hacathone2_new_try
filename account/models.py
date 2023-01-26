@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, User
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.crypto import get_random_string
 
 # Create your models here.
@@ -28,8 +28,6 @@ class UserManager(BaseUserManager):
         extra.setdefault('is_staff', True)
         extra.setdefault('is_active', True)
         return self._create(email, password, **extra)
-
-
 
 
 class User(AbstractBaseUser):

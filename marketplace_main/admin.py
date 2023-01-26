@@ -6,7 +6,7 @@ from django.db.models import Avg
 admin.site.register(Category)
 # admin.site.register(Stuffs)
 # admin.site.register(Rating)
-admin.site.register(Comments)
+# admin.site.register(Comments)
 class RatingInline(admin.TabularInline):
     model = Rating
 
@@ -22,3 +22,9 @@ class PostAdmin(admin.ModelAdmin):
     def get_rating(self, obj):
         result = obj.ratings.aggregate(Avg('rating'))
         return result['rating__avg']
+
+@admin.register(Comments)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ['stuff', 'author', 'body', 'posted_at']
+    search_fields = ['stuff', 'posted_at']
+    ordering = ['-posted_at']

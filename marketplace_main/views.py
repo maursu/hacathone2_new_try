@@ -1,5 +1,3 @@
-from django.shortcuts import render
-from rest_framework import generics
 from .models import Category, Rating, Stuffs, Comments, Favorites, Likes
 from .serializers import CategorySerializer, RatingSerializer, StuffsListSerializer, CommentsSerializer, StuffSerializer, FavoritesSerializer
 from rest_framework.viewsets import ModelViewSet
@@ -8,9 +6,8 @@ from rest_framework import filters
 from rest_framework.decorators import action, APIView,api_view
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from .permission import IsAdminAuthPermission, IsOwnerOrReadOnly
+from .permission import IsAdminAuthPermission, IsOwnerOrReadOnly, IsSellerOdAdmin
 from drf_yasg.utils import swagger_auto_schema
-
 # Create your views here.
 
 
@@ -31,9 +28,10 @@ class StuffViewSet(ModelViewSet):
     queryset = Stuffs.objects.all()
     serializer_class = StuffSerializer
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['title', 'category']
-    search_fields = ['created_at']
+    filterset_fields = ['title', 'category__slug']    #Фильтрация
+    search_fields = ['category__slug','title',]
     ordering_fields = ['created_at', 'title']
+    ordering = ['title']
 
     @action(['GET'], detail=True)
     def comments(self, request, pk=None):
@@ -44,7 +42,6 @@ class StuffViewSet(ModelViewSet):
 
     @action(['POST', 'PATCH'], detail=True)
     def rating(self,request, pk=None, **kwargs):
-        
         if request.method == 'POST':
             data = request.data.copy()
             data['stuff'] = pk
@@ -107,11 +104,9 @@ class StuffViewSet(ModelViewSet):
         elif self.action == 'create':
             self.permission_classes = [IsAdminAuthPermission]
         elif self.action in ['update','partial_update', 'destroy']:
-            self.permission_classes = [IsOwnerOrReadOnly]          
+            self.permission_classes = [IsSellerOdAdmin]          
         
         return super().get_permissions() 
-
- 
 
 
 class FavoritesListView(APIView):
@@ -125,15 +120,12 @@ class FavoritesListView(APIView):
     def delete(self, request, pk):
         try:
             favorite = Favorites.objects.get(id=pk)
+            deleted = favorite.product
             favorite.delete()
-            return Response(f'{favorite} was deleted')
+            return Response(f' {deleted} was deleted')
         except Favorites.DoesNotExist:
             return Response('This favorite does not exists')
      
-        
-
-
-
 
 class CommentCreateView(ModelViewSet):
 
