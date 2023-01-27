@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Category, Comments, Rating, Stuffs, Favorites, Cart, Order
 from django.db.models import Avg
+from django.utils.crypto import get_random_string
+from django.core.mail import send_mail
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -89,6 +91,7 @@ class CartSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         self.total_price += instance.price
+
         return representation
 
 
@@ -97,7 +100,42 @@ class CartSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    
+    user = serializers.ReadOnlyField(source='user.email')
+    product = serializers.ReadOnlyField(source='cart.product.title')
+    order_number = serializers.ReadOnlyField()
+
+
     class Meta:
         model = Order
-        fields = '__all__'
+        fields = ('product', 'user', 'order_number', 'shipping_address')
+        
+
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user
+        ord_num = get_random_string(5)
+        product = Cart.objects.filter(user=user)
+        shipping_address = validated_data.get('shipping_address')
+        for i in product:
+            order = Order.objects.create(product=i.products, user=user, shipping_address=shipping_address, order_number=ord_num)
+            i.delete()
+
+        send_mail(
+            subject='Order Confirm',
+            message=f'you order is confirmed. Order number:{ord_num}',
+            from_email='Lalavito@gmail.com',
+            recipient_list=[user]
+        )
+        
+        return order
+
+    def to_representation(self, instance):
+        representation =  super().to_representation(instance)
+        representation['product'] = instance.product.title
+        return representation
+
+
+        
+
+

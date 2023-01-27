@@ -1,14 +1,17 @@
-from .models import Category, Rating, Stuffs, Comments, Favorites, Likes, Cart
+from .models import Category, Rating, Stuffs, Comments, Favorites, Likes, Cart, Order
 from .serializers import CategorySerializer, RatingSerializer, StuffsListSerializer, CommentsSerializer, StuffSerializer, FavoritesSerializer,CartSerializer, OrderSerializer
 from rest_framework.viewsets import ModelViewSet
 import django_filters
-from rest_framework import filters
+from rest_framework import filters,generics
 from rest_framework.decorators import action, APIView,api_view
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .permission import IsAdminAuthPermission, IsOwnerOrReadOnly, IsSellerOdAdmin
 from drf_yasg.utils import swagger_auto_schema
 from collections import OrderedDict
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
+
 
 
 
@@ -79,7 +82,7 @@ class StuffViewSet(ModelViewSet):
             message = 'like'
         return Response(message, status=200)
 
-    @action(['POST'], detail=False)
+    @action(['POST'], detail=True)
     def favorite(self,request,pk):
         product = self.get_object()
         user = request.user
@@ -100,6 +103,10 @@ class StuffViewSet(ModelViewSet):
         products = self.get_object()
         user = request.user
         quantity = int(request.data.get('quantity'))
+        if quantity > products.quantity or quantity <=0:
+            raise ValueError(
+                f'На складе есть только {products.quantity}'
+            )
         price = quantity * products.price 
         try:
             cart = Cart.objects.get(products=products, user=user)
@@ -149,8 +156,8 @@ class CartView(ModelViewSet):
     serializer_class = CartSerializer
 
     def list(self, request, *args, **kwargs):
-        total = OrderedDict({'total_price':sum(i.price for i in self.queryset)})
         self.queryset = Cart.objects.filter(user=request.user)
+        total = OrderedDict({'total_price':sum(i.price for i in self.queryset)})
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -171,8 +178,34 @@ class CartView(ModelViewSet):
         return super().get_permissions()
 
 
-class OrderView(APIView):
-    pass 
+class OrderView(generics.CreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAdminAuthPermission]
+
+
+    
+class OrderListView(generics.ListAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAdminAuthPermission]
+
+    def get(self, request, *args, **kwargs):
+        self.queryset = Order.objects.filter(user=request.user)
+        return self.list(request, *args, **kwargs)
+
+class OrderRetrieveView(generics.ListAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAdminAuthPermission]
+
+    def get(self, request, *args, **kwargs):
+        if not request.data.get('order_number'):
+            return Response('You need to enter order_number')
+        self.queryset = Order.objects.filter(order_number=self.request.data.get('order_number'))
+        return self.list(request, *args, **kwargs)
+
+
 
 
 class CommentCreateView(ModelViewSet):

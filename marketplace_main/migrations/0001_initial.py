@@ -1,5 +1,4 @@
 
-
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
@@ -14,6 +13,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.CreateModel(
+            name='Cart',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('quantity', models.IntegerField(default=1)),
+                ('price', models.BigIntegerField(default=0)),
+            ],
+        ),
         migrations.CreateModel(
             name='Category',
             fields=[
@@ -32,7 +39,7 @@ class Migration(migrations.Migration):
                 ('price', models.IntegerField()),
                 ('quantity', models.IntegerField()),
                 ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='stuffs', to='marketplace_main.category')),
-                ('seller', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='posts', to=settings.AUTH_USER_MODEL)),
+                ('seller', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='stuffs', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'Stuff',
@@ -51,6 +58,16 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Rating',
                 'verbose_name_plural': 'Rating',
             },
+        ),
+        migrations.CreateModel(
+            name='Order',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('order_number', models.CharField(max_length=5)),
+                ('shipping_address', models.CharField(max_length=150)),
+                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orders', to='marketplace_main.cart')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orders', to=settings.AUTH_USER_MODEL)),
+            ],
         ),
         migrations.CreateModel(
             name='Likes',
@@ -84,13 +101,3 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Commentaries',
             },
         ),
-        migrations.CreateModel(
-            name='Cart',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('in_cart', models.BooleanField(default=False)),
-                ('products', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='products_in_cart', to='marketplace_main.stuffs')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-        ),
-    ]
