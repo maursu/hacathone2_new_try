@@ -99,6 +99,7 @@ class Cart(models.Model):
     def __str__(self):
         return self.products.title
 
+
 class Order(models.Model):
     order_number = models.CharField(max_length=5)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
