@@ -79,7 +79,7 @@ class StuffViewSet(ModelViewSet):
             message = 'like'
         return Response(message, status=200)
 
-    @action(['POST'], detail=False)
+    @action(['POST'], detail=True)
     def favorite(self,request,pk):
         product = self.get_object()
         user = request.user
