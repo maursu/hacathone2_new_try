@@ -1,9 +1,10 @@
 from rest_framework.test import APITestCase, APIRequestFactory, force_authenticate
-from .views import StuffViewSet, FavoritesListView
-from .models import Stuffs, Comments, Category, Favorites
+from .views import StuffViewSet, FavoritesListView, CartView
+from .models import Stuffs, Comments, Category, Favorites, Cart
 from account.models import User
 from django.core.files import File
 from collections import OrderedDict
+
 # Create your tests here.
 
 
@@ -41,26 +42,34 @@ class StuffsTest(APITestCase):
         response = view(request, pk=slug)
         assert response.status_code == 200
 
-    # def test_create(self):
-    #     user = User.objects.all()[0]
-    #     print(user)
-    #     print('==============================')
-    #     data = {
-    #         'description': 'Новый классный продукт, который не соответствует требованием никаких потребностей',
-    #         'title': 'Чудо-нож',
-    #         'category': 'cat1',
-    #         'price':800,
-    #         'quantity':1,
-    #         'seller': user.email
-    #     }
-    #     request = self.factory.post('stuffs', data, format='json')
-    #     force_authenticate(request, user=user)
-    #     view = StuffViewSet.as_view({'stuffs':'create'})
-    #     response = view(request)
-    #     print(request)
-    #     assert response.status_code == 201
-    #     assert response.data['title'] == data['title']
-    #     assert Stuffs.objects.filter(seller=user, body = data['title']).exists()
+    def test_create(self):
+        user = User.objects.all()[0]
+        data = {
+            'descriptinon': 'Новый классный продукт, реализующий весь людской потенциал',
+            'title': 'Чудо-нож',
+            'category': 'cat1',
+            'price':800,
+            'quantity':1,
+            'seller': 'test@gmail.com'
+        }
+        request = self.factory.post('stuffs/', data, format='json')
+        force_authenticate(request, user=user)
+        view = StuffViewSet.as_view({'post':'create'})
+        response = view(request)
+        assert response.status_code == 201
+        assert response.data['title'] == data['title']
+    
+    def test_add_to_cart(self):
+        user = User.objects.all()[0]
+        slug = Stuffs.objects.all()[0].slug
+        data = {
+            'quantity':10,
+            }
+        request = self.factory.post(f'stuffs/{slug}/add_to_cart', data, format='json')
+        force_authenticate(request, user=user)
+        view = StuffViewSet.as_view(actions={'post':'add_to_cart'})
+        response = view(request, pk = slug)
+        self.assertEqual(response.status_code, 200)
 
     def test_delete(self):
         user = User.objects.all()[0]
@@ -86,6 +95,7 @@ class StuffsTest(APITestCase):
         view = StuffViewSet.as_view({'patch':'partial_update'})
         response = view(request, pk=slug)
         assert response.status_code == 200
+        assert response.data['title'] == data['title']
     
     def test_comments(self):
         slug = Stuffs.objects.all()[0].slug
@@ -108,42 +118,35 @@ class StuffsTest(APITestCase):
         response = view(request, pk=slug)
         assert response.status_code == 200
 
-    # def test_like(self):
-    #     user = User.objects.all()[0]
-    #     slug = Stuffs.objects.all()[0].slug
-    #     request = self.factory.post(f'stuffs/{slug}/like/', format='json')
-    #     force_authenticate(request, user=user)
-    #     view = StuffViewSet.as_view({'post': 'create'})
-    #     response = view(request)
-    #     print(response.status_code)
-    #     assert response.status_code == 201
+    def test_favorite(self):
+        user = User.objects.all()[0]
+        slug = Stuffs.objects.all()[0].slug
+        request = self.factory.post(f'stuffs/{slug}/favorite/', format='json')
+        force_authenticate(request, user=user)
+        view = StuffViewSet.as_view(actions={'post':'favorite'})
+        response = view(request, pk = slug)
+        self.assertEqual(response.status_code, 200)
+
+    def test_like(self):
+        user = User.objects.all()[0]
+        slug = Stuffs.objects.all()[0].slug
+        request = self.factory.post(f'stuffs/{slug}/like/', format='json')
+        force_authenticate(request, user=user)
+        view = StuffViewSet.as_view(actions={'post':'like'})
+        response = view(request, pk = slug)
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_rating(self):
+        user = User.objects.all()[0]
+        slug = Stuffs.objects.all()[0].slug
+        from random import randint
+        data = {
+            'rating': randint(1, 10)
+        }
+        request = self.factory.post(f'stuffs/{slug}/rating/', data, format='json')
+        force_authenticate(request, user=user)
+        view = StuffViewSet.as_view(actions={'post':'rating'})
+        response = view(request, pk = slug)
+        self.assertEqual(response.data, 'рейтинг сохранен')
+        self.assertEqual(response.status_code, 200)
         
-
-
-
-
-# class FavoritesTest(APITestCase):
-#     def setUp(self):
-#         self.factory = APIRequestFactory()
-#         user = User.objects.create_user(
-#             email ='test@gmail.com',
-#             password = '1234',
-#             is_active = True,
-#             name = 'test_name',
-#             last_name = 'test_last_name'
-#         )
-#         favorites = [
-#         Favorites(user = user, product = 'product', favorite = True),
-#         Favorites(user = user, product = 'product2', favorite = True),
-#         ]
-#         Favorites.objects.bulk_create(favorites)
-
-    # def test_favorite(self):
-    #     user = User.objects.all()[0]
-    #     pk = Favorites.objects.all()
-    #     print(pk)
-    #     request = self.factory.delete(f'favorites/{pk}')
-    #     force_authenticate(request, user=user)
-    #     view = FavoritesListView.as_view({'delete':'destroy'})
-    #     response = view(request, pk=pk)
-    #     assert response.status_code == 204

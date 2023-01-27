@@ -28,7 +28,7 @@ class Stuffs(models.Model):
     posted_at = models.DateField(auto_now_add=True)
     price = models.IntegerField()
     quantity = models.IntegerField()
-    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='stuffs')
 
     def __str__(self) -> str:
         return self.title
