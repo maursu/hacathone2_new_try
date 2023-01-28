@@ -5,4 +5,4 @@ drf-yasg
 psycopg2-binary
 pillow
 python-slugify
-pip install python-decouple
+python-decouple

@@ -8,7 +8,6 @@ router = DefaultRouter()
 router.register('stuffs',StuffViewSet)
 router.register('comments', CommentCreateView)
 router.register('categories', CategoryListView),
-router.register('cart', CartView)
 
 
 urlpatterns = [
@@ -18,8 +17,9 @@ urlpatterns = [
     path('favorites/<int:pk>/', FavoritesListView.as_view()),
     path('to_order/', OrderView.as_view()),
     path('order_history/',OrderListView.as_view()),
-    path('order/', OrderRetrieveView.as_view())
-
+    path('order/', OrderRetrieveView.as_view()),
+    path('cart/', CartView.as_view({'get':'list'})),
+    path('cart/<str:pk>/', CartView.as_view({'delete':'destroy'})),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
