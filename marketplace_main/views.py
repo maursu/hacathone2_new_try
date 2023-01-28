@@ -172,7 +172,7 @@ class CartView(ModelViewSet):
         return Response(serializer.data)
 
     def get_permissions(self):
-        if self.action in ['update','partial_update', 'destroy']:
+        if self.action in ['list','retrieve','update','partial_update', 'destroy']:
             self.permission_classes = [IsAdminAuthPermission]          
         
         return super().get_permissions()

@@ -28,7 +28,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS =[config('HOST')]
 
 
 # Application definition
@@ -86,7 +86,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'marketplace',
-        'USER': 'admin',
+        'USER': 'lalavitohack',
         'PASSWORD': '1',
         'HOST': 'localhost',
         'PORT': 5432
