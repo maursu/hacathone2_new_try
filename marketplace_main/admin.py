@@ -1,12 +1,10 @@
 from django.contrib import admin
-from .models import Category, Stuffs, Rating, Comments
+from .models import Category, Stuffs, Rating, Comments, Order, Likes
 from django.db.models import Avg
 # Register your models here.
 
 admin.site.register(Category)
-# admin.site.register(Stuffs)
-# admin.site.register(Rating)
-# admin.site.register(Comments)
+
 class RatingInline(admin.TabularInline):
     model = Rating
 
@@ -28,3 +26,10 @@ class CommentsAdmin(admin.ModelAdmin):
     list_display = ['stuff', 'author', 'body', 'posted_at']
     search_fields = ['stuff', 'posted_at']
     ordering = ['-posted_at']
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['order_number', 'user', 'shipping_address']
+    search_fields = ['order_number', 'shipping_adress']
+    list_filter = ['order_number', 'user']
+
