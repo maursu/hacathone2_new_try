@@ -3,6 +3,7 @@ https://www.toptal.com/developers/gitignore/api/python,virtualenv,django,visuals
 # Edit at 
 https://www.toptal.com/developers/gitignore?templates=python,virtualenv,django,visualstudiocode
 
+.DS_Store
 ### Django ###
 *.log
 *.pot
