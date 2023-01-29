@@ -20,7 +20,7 @@ class StuffsTest(APITestCase):
             name = 'test_name',
             last_name = 'test_last_name'
         )
-        img = File(open('stuffs_image/2cc4f20786812d864cef0571e24c1cf6_4KM1clJ.jpg', 'rb'))
+        img = File(open('media/stuffs_image/2cc4f20786812d864cef0571e24c1cf6_PzGHCSZ.jpg', 'rb'))
         stuffs = [
         Stuffs(seller=user, descriptinon = 'stuff', title='stuff1', image = img, category = self.category, slug=1, price = 100, quantity = 1),
         Stuffs(seller=user, descriptinon = 'stuff2', title='stuff2', image = img, category = self.category, slug=2, price = 100, quantity = 1),
@@ -63,7 +63,7 @@ class StuffsTest(APITestCase):
         user = User.objects.all()[0]
         slug = Stuffs.objects.all()[0].slug
         data = {
-            'quantity':10,
+            'quantity':1,
             }
         request = self.factory.post(f'stuffs/{slug}/add_to_cart', data, format='json')
         force_authenticate(request, user=user)
